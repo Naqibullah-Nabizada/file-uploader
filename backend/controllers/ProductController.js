@@ -1,7 +1,9 @@
 import Product from "../models/ProductModel.js";
 
+import fs from "fs";
 import path from "path";
 
+//! getAllProducts
 export const getProducts = async (req, res) => {
   try {
     const response = await Product.findAll();
@@ -12,15 +14,49 @@ export const getProducts = async (req, res) => {
 }
 
 
+//! singleProduct
+export const singleProduct = async (req, res) => {
+  try {
+    const response = await Product.findOne({
+      where: { id: req.params.id }
+    });
+    res.json(response);
+  } catch (error) {
+    res.json(error)
+  }
+}
+
+
+//! deleteProduct
+export const deleteProduct = async (req, res) => {
+  const product = await Product.findOne({
+    where: { id: req.params.id }
+  })
+
+  if (!product) return res.json("product not found");
+
+  try {
+    const filePath = `./public/images/${product.image}`;
+    fs.unlinkSync(filePath);
+    await Product.destroy({
+      where: { id: req.params.id }
+    });
+    res.json("product deleted successfully");
+  } catch (error) {
+    res.json(error)
+  }
+}
+
+//! saveProduct
 export const saveProduct = (req, res) => {
 
   if (req.files == null) {
     return res.json('please send an image')
   }
   console.log(req.body.file)
-  
+
   const name = req.body.name;
-  const file = req.files.image; 
+  const file = req.files.image;
   const fileSize = file.data.length;
   const ext = path.extname(file.name);
   const fileName = file.md5 + ext;
@@ -36,13 +72,13 @@ export const saveProduct = (req, res) => {
   }
 
   file.mv(`./public/images/${fileName}`, async (err) => {
-    // if (err) return res.json({ msg: err.message });
+    if (err) return res.json({ msg: err.message });
 
     try {
       await Product.create({ name: name, image: fileName, url: url });
       res.json({ msg: "product created successfully" });
     } catch (error) {
-      // console.log(error);
+      console.log(error);
     }
   })
 }
