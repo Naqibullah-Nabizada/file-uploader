@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize";
 
-const db = new Sequelize("uploader", "root", "", {
+const db = new Sequelize("image_uploader", "root", "", {
   host: "localhost",
   dialect: "mysql",
 });
