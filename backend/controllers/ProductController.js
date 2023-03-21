@@ -110,7 +110,8 @@ export const saveProduct = (req, res) => {
   const file = req.files.image;
   const fileSize = file.data.length;
   const ext = path.extname(file.name);
-  const fileName = file.md5 + ext;
+  const dateNow = Math.random(Date.now());
+  const fileName = dateNow + ext;
   const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;
   const allowedType = ['.png', '.jpg', '.jpeg'];
 
