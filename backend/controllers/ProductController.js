@@ -57,16 +57,15 @@ export const updateProduct = async (req, res) => {
   if (!product) return res.json("product not found");
 
   let fileName = "";
-  if (res.files === null) {
+  if (req.files == null) {
     fileName = product.image;
   } else {
     
-    const name = req.body.name;
     const file = req.files.image;
     const fileSize = file.data.length;
     const ext = path.extname(file.name);
-    const fileName = file.md5 + ext;
-    const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;
+    const dateNow = Math.round(Date.now());
+    fileName = dateNow + ext;
     const allowedType = ['.png', '.jpg', '.jpeg'];
 
     if (!allowedType.includes(ext.toLocaleLowerCase())) {
@@ -83,18 +82,20 @@ export const updateProduct = async (req, res) => {
     file.mv(`./public/images/${fileName}`, async (err) => {
       if (err) return res.json({ msg: err.message });
     });
+  }
 
+  const name = req.body.name;
+  const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;
 
-    try {
-      await Product.update({
-        name: name, image: fileName, url: url
-      }, {
-        where: { id: req.params.id }
-      });
-    } catch (error) {
-      res.json(error);
-    }
-
+  try {
+    await Product.update({
+      name: name, image: fileName, url: url
+    }, {
+      where: { id: req.params.id }
+    });
+    res.json(url);
+  } catch (error) {
+    res.json(error);
   }
 }
 
@@ -102,7 +103,7 @@ export const updateProduct = async (req, res) => {
 export const saveProduct = (req, res) => {
 
   if (req.files == null) {
-    return res.json('please send an image')
+    return res.json('please send an image');
   }
   console.log(req.body.file)
 
@@ -110,7 +111,7 @@ export const saveProduct = (req, res) => {
   const file = req.files.image;
   const fileSize = file.data.length;
   const ext = path.extname(file.name);
-  const dateNow = Math.random(Date.now());
+  const dateNow = Math.round(Date.now());
   const fileName = dateNow + ext;
   const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;
   const allowedType = ['.png', '.jpg', '.jpeg'];
